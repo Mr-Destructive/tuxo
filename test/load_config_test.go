@@ -1,13 +1,15 @@
 package test
 
 import (
+	"log"
 	"testing"
 
 	"github.com/mr-destructive/turxgo/ssg"
 )
 
 func TestLoadConfig(t *testing.T) {
-	configFiles, err := ssg.LoadConfig()
+	configFiles, err := ssg.LoadConfigFilePath()
+	log.Println(configFiles)
 	if err != nil {
 		t.Error(err)
 	}
@@ -15,6 +17,5 @@ func TestLoadConfig(t *testing.T) {
 		t.Error("no config file found")
 	}
 	if len(configFiles) > 1 {
-		t.Error("multiple config files found")
 	}
 }

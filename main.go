@@ -18,4 +18,9 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(config)
+	post, err := ssg.LoadPosts(config)
+    if err != nil {
+        panic(err)
+    }
+    fmt.Println(post)
 }

@@ -1,3 +1,3 @@
-module github.com/mr-destructive/turxgo
+module github.com/mr-destructive/tuxo
 
 go 1.21.5

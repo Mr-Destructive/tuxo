@@ -1,6 +1,7 @@
 package ssg
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,7 +13,7 @@ type TuxoConfig struct {
 }
 
 func LoadConfigFilePath() ([]string, error) {
-	fileNamePattern := "turxgo"
+	fileNamePattern := "tuxo"
 	allowedExtensions := []string{".yaml", ".yml", ".json", ".toml"}
 	configFiles := []string{}
 	fileList := []os.FileInfo{}
@@ -60,7 +61,12 @@ func LoadConfig(configPath string) (*TuxoConfig, error) {
 	defer file.Close()
 	switch filepath.Ext(configPath) {
 	case ".json":
-		return nil, nil
+		jsonConfig := TuxoConfig{}
+		err = json.NewDecoder(file).Decode(&jsonConfig)
+		if err != nil {
+			return nil, err
+		}
+		return &jsonConfig, nil
 	case ".yaml", ".yml":
 		return nil, nil
 	case ".toml":

@@ -4,7 +4,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/mr-destructive/turxgo/ssg"
+	"github.com/mr-destructive/tuxo/ssg"
 )
 
 func TestLoadConfig(t *testing.T) {

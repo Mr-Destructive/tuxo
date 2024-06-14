@@ -8,8 +8,10 @@ import (
 )
 
 type TuxoConfig struct {
-	PostDir string `yaml:"post_dir" json:"post_dir" toml:"post_dir"`
-	Static  string `yaml:"static" json:"static" toml:"static"`
+	PostDir     string `yaml:"post_dir" json:"post_dir" toml:"post_dir"`
+	Static      string `yaml:"static" json:"static" toml:"static"`
+	TemplateDir string `yaml:"template_dir" json:"template_dir" toml:"template_dir"`
+    OutputDir   string `yaml:"output_dir" json:"output_dir" toml:"output_dir"`
 }
 
 func LoadConfigFilePath() ([]string, error) {

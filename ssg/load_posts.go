@@ -70,7 +70,12 @@ func readPost(postPath string) (Post, error) {
 	if err != nil {
 		return Post{}, err
 	}
-	post := Post{Content: string(content)}
+	post := Post{
+		Title:   postPath,
+		Content: string(content),
+		Type:    "posts",
+        Slug:    filepath.Base(postPath),
+	}
 
 	return post, nil
 }

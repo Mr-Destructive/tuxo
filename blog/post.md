@@ -1,5 +1,8 @@
----
-type: post
+---json
+{
+    "type": "post",
+    "title": "Tuxo"
+}
 ---
 
 ## How to setup Tuxo

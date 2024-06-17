@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+
 	"github.com/mr-destructive/tuxo/ssg"
 )
 
@@ -11,13 +13,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(configFiles)
 	configFile := configFiles[0]
 	config, err := ssg.LoadConfig(configFile)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(config)
 	post, err := ssg.LoadPosts(config)
 	if err != nil {
 		panic(err)
@@ -27,14 +27,19 @@ func main() {
 		panic(err)
 	}
 	for _, post := range post.Posts {
-		parsedHTML, err := ssg.RenderContent(templates, post)
+		post, parsedHTML, err := ssg.RenderContent(templates, post, config)
 		if err != nil {
 			panic(err)
 		}
-        fmt.Println(post.Slug)
-		err = ssg.WriteHTML(config.OutputDir, post.Slug+".html", parsedHTML)
+		if post.Slug == "" {
+			post.Slug = post.Title
+		}
+		err = ssg.WriteHTML(config.OutputDir, post.Slug, parsedHTML)
 		if err != nil {
 			panic(err)
 		}
 	}
+	var portFlag = flag.Int("p", 8080, "port number")
+	flag.Parse()
+	ssg.StartServer(*portFlag, config.OutputDir)
 }

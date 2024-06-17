@@ -5,13 +5,16 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v3"
 )
 
 type TuxoConfig struct {
+	Type        string `yaml:"type" json:"type" toml:"type"`
 	PostDir     string `yaml:"post_dir" json:"post_dir" toml:"post_dir"`
 	Static      string `yaml:"static" json:"static" toml:"static"`
 	TemplateDir string `yaml:"template_dir" json:"template_dir" toml:"template_dir"`
-    OutputDir   string `yaml:"output_dir" json:"output_dir" toml:"output_dir"`
+	OutputDir   string `yaml:"output_dir" json:"output_dir" toml:"output_dir"`
 }
 
 func LoadConfigFilePath() ([]string, error) {
@@ -63,14 +66,23 @@ func LoadConfig(configPath string) (*TuxoConfig, error) {
 	defer file.Close()
 	switch filepath.Ext(configPath) {
 	case ".json":
-		jsonConfig := TuxoConfig{}
+		jsonConfig := TuxoConfig{
+			Type: "json",
+		}
 		err = json.NewDecoder(file).Decode(&jsonConfig)
 		if err != nil {
 			return nil, err
 		}
 		return &jsonConfig, nil
 	case ".yaml", ".yml":
-		return nil, nil
+		yamlConfig := TuxoConfig{
+			Type: "yaml",
+		}
+		err := yaml.NewDecoder(file).Decode(&yamlConfig)
+		if err != nil {
+			return nil, err
+		}
+		return &yamlConfig, nil
 	case ".toml":
 		return nil, nil
 	}

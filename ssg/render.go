@@ -2,33 +2,32 @@ package ssg
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"os"
 	"path/filepath"
 )
 
-func RenderContent(tmpl *template.Template, post Post) (string, error) {
+func RenderContent(tmpl *template.Template, post Post, config *TuxoConfig) (Post, string, error) {
+	var postObj Post
 	var templateName string
-	fmt.Println(post.Type)
-	if post.Type == "posts" {
+	if post.Type == "post" {
 		templateName = "post.html"
 	}
 	var rendered bytes.Buffer
-	err := tmpl.ExecuteTemplate(&rendered, templateName, post)
-	fmt.Println(rendered.String())
+	post, content, err := LoadFrontMatterToPost(post.Content, "---json", config.Type)
+	post.Content = content
+	err = tmpl.ExecuteTemplate(&rendered, templateName, post)
 	if err != nil {
-		return "", err
+		return postObj, "", err
 	}
-	return rendered.String(), nil
+	return post, rendered.String(), nil
 }
 
 func WriteHTML(outputDir, filename, content string) error {
-	outputPath := filepath.Join(outputDir, filename)
-	fmt.Println(outputPath)
-	err := os.MkdirAll(filepath.Dir(outputPath), os.ModePerm)
+	err := os.MkdirAll(filepath.Join(outputDir, filename), 0755)
+	err = os.WriteFile(filepath.Join(outputDir, filename, "index.html"), []byte(content), 0644)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(outputPath, []byte(content), 0644)
+	return nil
 }

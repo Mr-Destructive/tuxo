@@ -1,5 +1,7 @@
 {
     "post_dir": "blog/",
     "template_dir": "templates/",
-    "output_dir": "public/"
+    "output_dir": "public/",
+    "feeds": [
+    ]
 }

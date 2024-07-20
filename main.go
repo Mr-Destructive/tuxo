@@ -34,11 +34,18 @@ func main() {
 		if post.Slug == "" {
 			post.Slug = post.Title
 		}
-		err = ssg.WriteHTML(config.OutputDir, post.Slug, parsedHTML)
+		err = ssg.WriteHTML(config.OutputDir, post.Slug, "", parsedHTML)
 		if err != nil {
 			panic(err)
 		}
 	}
+	//load feeds
+	_, err = ssg.GenerateFeedHTML(config)
+	if err != nil {
+		panic(err)
+	}
+	// copy static files
+	err = ssg.LoadStatic(config)
 	var portFlag = flag.Int("p", 8080, "port number")
 	flag.Parse()
 	ssg.StartServer(*portFlag, config.OutputDir)

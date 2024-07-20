@@ -10,12 +10,12 @@ import (
 )
 
 type TuxoConfig struct {
-	Type        string                 `yaml:"type" json:"type" toml:"type"`
-	PostDir     string                 `yaml:"post_dir" json:"post_dir" toml:"post_dir"`
-	Static      string                 `yaml:"static" json:"static" toml:"static"`
-	TemplateDir string                 `yaml:"template_dir" json:"template_dir" toml:"template_dir"`
-	OutputDir   string                 `yaml:"output_dir" json:"output_dir" toml:"output_dir"`
-	Feeds       map[string]Feed        `yaml:"feeds" json:"feeds" toml:"feeds"`
+	Type        string          `yaml:"type" json:"type" toml:"type"`
+	PostDir     string          `yaml:"post_dir" json:"post_dir" toml:"post_dir"`
+	StaticDir      string          `yaml:"static_dir" json:"static_dir" toml:"static_dir"`
+	TemplateDir string          `yaml:"template_dir" json:"template_dir" toml:"template_dir"`
+	OutputDir   string          `yaml:"output_dir" json:"output_dir" toml:"output_dir"`
+	Feeds       map[string]Feed `yaml:"feeds" json:"feeds" toml:"feeds"`
 }
 
 func LoadConfigFilePath() ([]string, error) {

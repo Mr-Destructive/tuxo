@@ -1,14 +1,15 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>{{.BlogTitle}}</title>
+        <title>{{.Title}}</title>
+        <link rel="stylesheet" type="text/css" href="../style.css">
     </head>
     <body>
-        <h1>{{.BlogTitle}}</h1>
+        <h1>{{.Title}}</h1>
 
         <ul>
             {{range .Posts}}
-                <li><a href="{{.Slug}}">{{.Title}}</a></li>
+                <li><a href="/{{.Slug}}">{{.Title}}</a></li>
             {{end}}
         </ul>
     </body>

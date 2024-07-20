@@ -2,6 +2,7 @@ package ssg
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -23,11 +24,21 @@ func RenderContent(tmpl *template.Template, post Post, config *TuxoConfig) (Post
 	return post, rendered.String(), nil
 }
 
-func WriteHTML(outputDir, filename, content string) error {
-	err := os.MkdirAll(filepath.Join(outputDir, filename), 0755)
-	err = os.WriteFile(filepath.Join(outputDir, filename, "index.html"), []byte(content), 0644)
-	if err != nil {
-		return err
+func WriteHTML(outputDir, filename, feed, content string) error {
+	fileORFeed := ""
+	if filename == "" {
+		fileORFeed = feed + ".html"
+		os.WriteFile(filepath.Join(outputDir, fileORFeed), []byte(content), 0644)
 	}
+	if feed == "" {
+		fileORFeed = filename + "/index.html"
+		os.MkdirAll(filepath.Join(outputDir, filename), 0755)
+		os.WriteFile(filepath.Join(outputDir, fileORFeed), []byte(content), 0644)
+	}
+	if feed != "" && filename != "" {
+		os.MkdirAll(filepath.Join(outputDir, filename), 0755)
+		os.WriteFile(filepath.Join(outputDir, filename, feed), []byte(content), 0644)
+	}
+	fmt.Println(fileORFeed)
 	return nil
 }

@@ -2,6 +2,11 @@
     "post_dir": "blog/",
     "template_dir": "templates/",
     "output_dir": "public/",
-    "feeds": [
-    ]
+    "static_dir": "static/",
+    "feeds": {
+        "vim": {
+            "type": "post",
+            "title": "Vim"
+        }
+    }
 }

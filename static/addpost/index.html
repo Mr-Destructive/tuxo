@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Post</title>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+    <script>
+        const BASE_URL = "https://tuxo-blog-t1.gormeet711.workers.dev";
+        async function authenticate() {
+            const username = prompt('Enter your username:');
+            const password = prompt('Enter your password:');
+            
+            if (!username || !password) {
+                alert("Username and password are required.");
+                return authenticate();
+            }
+
+            const api = `${BASE_URL}?action=authenticate`;
+            
+            try {
+                const response = await fetch(api, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.message === "Login successful") {
+                    alert("Login Successful");
+                    document.getElementById("content").style.display = "block";
+                } else {
+                    alert("Invalid username or password");
+                    return authenticate();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert("An error occurred. Please try again.");
+                return authenticate();
+            }
+        }
+
+        async function submitPost(event) {
+            event.preventDefault();
+
+            const title = document.getElementById("title").value;
+            const description = document.getElementById("description").value;
+            const content = document.getElementById("post-content").value;
+
+            const action = 'post';
+            const api = `${BASE_URL}?action=${encodeURIComponent(action)}`;
+            
+            try {
+                const response = await fetch(api, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, description, content })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.message === "Post added successfully") {
+                    alert("Post added successfully!");
+                    document.getElementById("title").value = '';
+                    document.getElementById("description").value = '';
+                    document.getElementById("post-content").value = '';
+                } else {
+                    alert("Failed to add post. Please try again.");
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert("An error occurred while adding the post. Please try again.");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            authenticate();
+            document.getElementById('post-form').addEventListener('submit', submitPost);
+        });
+    </script>
+</head>
+<body>
+    <div id="content" style="display: none;">
+        <h1>Add Post</h1>
+        <form id="post-form">
+            <label for="title">Title:</label><br>
+            <input type="text" id="title" name="title" required><br>
+            <label for="description">Description:</label><br>
+            <input type="text" id="description" name="description" required><br>
+            <label for="post-content">Content:</label><br>
+            <textarea id="post-content" name="content" rows="4" cols="50" required></textarea><br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</body>
+</html>

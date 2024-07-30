@@ -6,7 +6,7 @@
     </head>
     <body>
         <h1>{{.Title}}</h1>
-
+        <button><a href="/addpost">+</a></button>
         <ul>
             {{range .Posts}}
                 <li><a href="/{{.Slug}}">{{.Title}}</a></li>

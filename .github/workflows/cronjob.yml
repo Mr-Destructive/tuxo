@@ -32,6 +32,12 @@ jobs:
       run: |
         go run script.go
 
+    - name: Copy generated files
+      run: |
+        mkdir tuxout
+        cp -r static/ tuxout/
+        cp -r posts/** tuxout/blog/
+
     - name: Checkout output branch
       run: |
         git fetch origin
@@ -39,23 +45,16 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Copy generated files
-      run: |
-        mkdir tuxout
-        cp -r static/ tuxout/
-        cp -r posts/ tuxout/blog
-
     - name: Run SSG
       run: |
         go run main.go
-        cp -r public/ tuxout/
+        cp -r public/** tuxout/
 
-    - name: Commit and push changes
-      run: |
-        git config --global user.name 'github-actions'
-        git config --global user.email 'github-actions@github.com'
-        git add tuxout/
-        git commit -m 'Update generated Markdown files'
-        git push -u origin output-branch
+    - name: GitHub Pages
+      uses: crazy-max/ghaction-github-pages@v3
+      with:
+        target_branch: output-branch
+        build_dir: tuxout
+        jekyll: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

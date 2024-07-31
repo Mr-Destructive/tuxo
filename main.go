@@ -47,6 +47,11 @@ func main() {
 	// copy static files
 	err = ssg.LoadStatic(config)
 	var portFlag = flag.Int("p", 8080, "port number")
+	var serverFlag = flag.Bool("s", false, "start server")
 	flag.Parse()
-	ssg.StartServer(*portFlag, config.OutputDir)
+	if *serverFlag {
+		ssg.StartServer(*portFlag, config.OutputDir)
+		return
+	}
+	return
 }

@@ -41,14 +41,20 @@ jobs:
 
     - name: Copy generated files
       run: |
-        mkdir -p posts
-        cp -r posts/* .
+        mkdir tuxout
+        cp -r static/ tuxout/
+        cp -r posts/ tuxout/blog
+
+    - name: Run SSG
+      run: |
+        go run main.go
+        cp -r public/ tuxout/
 
     - name: Commit and push changes
       run: |
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
-        git add .
+        git add tuxout/
         git commit -m 'Update generated Markdown files'
         git push -u origin output-branch
       env:

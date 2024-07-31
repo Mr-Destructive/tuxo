@@ -1,0 +1,55 @@
+name: Update Posts
+
+on:
+  schedule:
+    - cron: '* 20 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-posts:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout main branch
+      uses: actions/checkout@v2
+      with:
+        ref: main
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.20'
+
+    - name: Install dependencies
+      run: |
+        go mod tidy
+
+    - name: Fetch and Generate Posts
+      env:
+        DB_TOKEN: ${{ secrets.DB_TOKEN }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_ORG_NAME: ${{ secrets.DB_ORG_NAME }}
+      run: |
+        go run script.go
+
+    - name: Checkout output branch
+      run: |
+        git fetch origin
+        git checkout output-branch || git checkout -b output-branch
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Copy generated files
+      run: |
+        mkdir -p posts
+        cp -r posts/* .
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add .
+        git commit -m 'Update generated Markdown files'
+        git push -u origin output-branch
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

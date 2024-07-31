@@ -112,7 +112,6 @@ func LoadEnv(filename string) error {
 func main() {
 	err := LoadEnv(".env")
 	if err != nil {
-		log.Fatal(err)
 	}
 	dbToken := os.Getenv("DB_TOKEN")
 	dbName := os.Getenv("DB_NAME")

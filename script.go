@@ -12,7 +12,7 @@ import (
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
-type Post struct {
+type DBPost struct {
 	ID          int
 	Title       string
 	Description string
@@ -20,6 +20,12 @@ type Post struct {
 	Author      string
 	CreatedAt   string
 	UpdatedAt   string
+}
+
+type Post struct {
+	DBPost
+	Slug string
+	Type string
 }
 
 func fetchPosts(db *sql.DB) ([]Post, error) {
@@ -31,7 +37,7 @@ func fetchPosts(db *sql.DB) ([]Post, error) {
 
 	var posts []Post
 	for rows.Next() {
-		var post Post
+		var post DBPost
 		postVal := reflect.ValueOf(&post).Elem()
 		var scanArgs []interface{}
 		for i := 0; i < postVal.NumField(); i++ {
@@ -40,7 +46,8 @@ func fetchPosts(db *sql.DB) ([]Post, error) {
 		if err := rows.Scan(scanArgs...); err != nil {
 			return nil, err
 		}
-		posts = append(posts, post)
+		p := Post{DBPost: post, Type: "posts"}
+		posts = append(posts, p)
 	}
 	return posts, nil
 }
@@ -59,7 +66,7 @@ func generateMarkdown(posts []Post) error {
 			return err
 		}
 		defer file.Close()
-		frontmatter := "---\n"
+		frontmatter := "---json\n{\n"
 		tempPost := reflect.ValueOf(post)
 		if tempPost.Kind() == reflect.Ptr {
 			tempPost = reflect.Indirect(tempPost)
@@ -74,10 +81,10 @@ func generateMarkdown(posts []Post) error {
 			fieldValue := field.String()
 
 			if field.Kind() == reflect.String && fieldValue != "" && fieldName != "Content" {
-				frontmatter += fmt.Sprintf("%s: %s\n", fieldName, fieldValue)
+				frontmatter += fmt.Sprintf("\"%s\": \"%s\",\n", strings.ToLower(fieldName), fieldValue)
 			}
 		}
-		content := fmt.Sprintf("%s---\n\n%s", frontmatter, post.Content)
+		content := fmt.Sprintf("%s\n}\n---\n\n%s", frontmatter, post.Content)
 		if _, err := file.WriteString(content); err != nil {
 			return err
 		}

@@ -35,8 +35,9 @@ jobs:
     - name: Copy generated files
       run: |
         mkdir tuxout
+        mkdir -p tuxout/blog
         cp -r static/ tuxout/
-        cp -r posts/** tuxout/blog/
+        cp -r posts/** tuxout/
 
     - name: Checkout output branch
       run: |

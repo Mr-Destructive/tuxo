@@ -37,7 +37,7 @@ jobs:
         mkdir tuxout
         mkdir -p tuxout/blog
         cp -r static/ tuxout/
-        cp -r posts/** tuxout/
+        cp -r posts/** blog/
 
     - name: Checkout output branch
       run: |

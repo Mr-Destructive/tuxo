@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -13,19 +14,19 @@ import (
 )
 
 type DBPost struct {
-	ID          int
-	Title       string
-	Description string
-	Content     string
-	Author      string
-	CreatedAt   string
-	UpdatedAt   string
+	ID          int    `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Content     string `json:"content"`
+	Author      string `json:"author"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
 }
 
 type Post struct {
 	DBPost
-	Slug string
-	Type string
+	Slug string `json:"slug"`
+	Type string `json:"type"`
 }
 
 func fetchPosts(db *sql.DB) ([]Post, error) {
@@ -55,36 +56,19 @@ func fetchPosts(db *sql.DB) ([]Post, error) {
 func generateMarkdown(posts []Post) error {
 	for _, post := range posts {
 		// create posts directory if it doesn't exist
-		if _, err := os.Stat("posts"); os.IsNotExist(err) {
-			if err := os.Mkdir("posts", 0755); err != nil {
+		if _, err := os.Stat("blog"); os.IsNotExist(err) {
+			if err := os.Mkdir("blog", 0755); err != nil {
 				return err
 			}
 		}
-		filePath := fmt.Sprintf("posts/%d.md", post.ID)
+		filePath := fmt.Sprintf("blog/%d.md", post.ID)
 		file, err := os.Create(filePath)
 		if err != nil {
 			return err
 		}
 		defer file.Close()
-		frontmatter := "---json\n{\n"
-		tempPost := reflect.ValueOf(post)
-		if tempPost.Kind() == reflect.Ptr {
-			tempPost = reflect.Indirect(tempPost)
-		}
-		if tempPost.Kind() != reflect.Struct {
-			return fmt.Errorf("expected struct, got %s", tempPost.Kind())
-		}
-		n := tempPost.NumField()
-		for i := 0; i < n; i++ {
-			field := tempPost.Field(i)
-			fieldName := tempPost.Type().Field(i).Name
-			fieldValue := field.String()
-
-			if field.Kind() == reflect.String && fieldValue != "" && fieldName != "Content" {
-				frontmatter += fmt.Sprintf("\"%s\": \"%s\",\n", strings.ToLower(fieldName), fieldValue)
-			}
-		}
-		content := fmt.Sprintf("%s\n}\n---\n\n%s", frontmatter, post.Content)
+		jsonKV, err := json.Marshal(post)
+		content := fmt.Sprintf("---json{\n%s\n}\n---\n\n%s", string(jsonKV)[1:len(string(jsonKV))-1], post.Content)
 		if _, err := file.WriteString(content); err != nil {
 			return err
 		}

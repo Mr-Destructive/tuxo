@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Post</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        #content {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        #post-form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        #editor-container {
+            display: flex;
+            margin-top: 20px;
+        }
+        #post-content, #preview {
+            width: 50%;
+            height: 400px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        #preview {
+            margin-left: 20px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+        #toolbar {
+            margin-bottom: 10px;
+        }
+        #toolbar button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin-right: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #toolbar button:hover {
+            background-color: #2980b9;
+        }
+        input[type="submit"] {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 4px;
+        }
+        input[type="submit"]:hover {
+            background-color: #27ae60;
+        }
+    </style>
+    <script>
+        const BASE_URL = "https://tuxo-blog-t1.gormeet711.workers.dev";
+
+        async function authenticate() {
+            const username = prompt('Enter your username:');
+            const password = prompt('Enter your password:');
+            
+            if (!username || !password) {
+                alert("Username and password are required.");
+                return authenticate();
+            }
+
+            const api = `${BASE_URL}?action=authenticate`;
+            
+            try {
+                const response = await fetch(api, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.message === "Login successful") {
+                    alert("Login Successful");
+                    document.getElementById("content").style.display = "block";
+                } else {
+                    alert("Invalid username or password");
+                    return authenticate();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert("An error occurred. Please try again.");
+                return authenticate();
+            }
+        }
+
+        async function submitPost(event) {
+            event.preventDefault();
+
+            const title = document.getElementById("title").value;
+            const description = document.getElementById("description").value;
+            const content = document.getElementById("post-content").value;
+
+            const action = 'post';
+            const api = `${BASE_URL}?action=${encodeURIComponent(action)}`;
+            
+            try {
+                const response = await fetch(api, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, description, content })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.message === "Post added successfully") {
+                    alert("Post added successfully!");
+                    document.getElementById("title").value = '';
+                    document.getElementById("description").value = '';
+                    document.getElementById("post-content").value = '';
+                    updatePreview();
+                } else {
+                    alert("Failed to add post. Please try again.");
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert("An error occurred while adding the post. Please try again.");
+            }
+        }
+
+        function updatePreview() {
+            const content = document.getElementById("post-content").value;
+            const preview = document.getElementById("preview");
+            preview.innerHTML = marked.parse(content);
+        }
+
+        function insertMarkdown(type) {
+            const textarea = document.getElementById("post-content");
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            let insertion = '';
+
+            switch(type) {
+                case 'bold':
+                    insertion = `**${text.substring(start, end) || 'bold text'}**`;
+                    break;
+                case 'italic':
+                    insertion = `*${text.substring(start, end) || 'italic text'}*`;
+                    break;
+                case 'link':
+                    insertion = `[${text.substring(start, end) || 'link text'}](url)`;
+                    break;
+                case 'code':
+                    insertion = `\`${text.substring(start, end) || 'code'}\``;
+                    break;
+                case 'image':
+                    insertion = `![${text.substring(start, end) || 'alt text'}](image_url)`;
+                    break;
+            }
+
+            textarea.value = text.substring(0, start) + insertion + text.substring(end);
+            updatePreview();
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            authenticate();
+            document.getElementById('post-form').addEventListener('submit', submitPost);
+            document.getElementById('post-content').addEventListener('input', updatePreview);
+        });
+    </script>
+</head>
+<body>
+    <div id="content" style="display: none;">
+        <h1>Add Post</h1>
+        <form id="post-form">
+            <input type="text" id="title" name="title" placeholder="Title" required>
+            <input type="text" id="description" name="description" placeholder="Description" required>
+            
+            <div id="toolbar">
+                <button type="button" onclick="insertMarkdown('bold')"><i class="fas fa-bold"></i></button>
+                <button type="button" onclick="insertMarkdown('italic')"><i class="fas fa-italic"></i></button>
+                <button type="button" onclick="insertMarkdown('link')"><i class="fas fa-link"></i></button>
+                <button type="button" onclick="insertMarkdown('code')"><i class="fas fa-code"></i></button>
+                <button type="button" onclick="insertMarkdown('image')"><i class="fas fa-image"></i></button>
+            </div>
+            <div id="editor-container">
+                <textarea id="post-content" name="content" required></textarea>
+                <div id="preview"></div>
+            </div>
+            
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</body>
+</html>
